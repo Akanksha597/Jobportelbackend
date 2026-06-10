@@ -52,16 +52,7 @@ router.get(
   jobController.getMyAllJobs
 );
 
-// ======================================================
-// DELETE JOB
-// ======================================================
 
-router.delete(
-  "/:id",
-  protectRoute,
-
-  jobController.deleteJob
-);
 
 // ======================================================
 // GET SINGLE JOB
@@ -69,7 +60,7 @@ router.delete(
 
 router.get(
   "/:id",
-  protectRoute,
+
   jobController.getSingleJob
 );
 // ======================================================
@@ -80,6 +71,34 @@ router.put(
   "/:id",
   protectRoute,
   jobController.updateJob
+);
+
+
+router.delete(
+  "/request-delete/:id",
+  protectRoute,
+  jobController.deleteJob
+);
+
+router.get(
+  "/delete-requests",
+  protectRoute,
+  restrictTo("moderator", "admin"),
+  jobController.getDeleteRequests
+);
+
+router.delete(
+  "/approve-delete/:id",
+  protectRoute,
+  restrictTo("moderator", "admin"),
+  jobController.approveDeleteJob
+);
+
+router.put(
+  "/reject-delete/:id",
+  protectRoute,
+  restrictTo("moderator", "admin"),
+  jobController.rejectDeleteRequest
 );
 
 module.exports = router;

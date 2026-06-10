@@ -34,11 +34,34 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    city: {
+  type: String,
+  trim: true,
+  default: "",
+},
+
+dob: {
+  type: Date,
+  default: null,
+},
+
     // 👑 ROLE SYSTEM
     role: {
       type: String,
       enum: ["user", "admin", "moderator", "job_poster"],
       default: "user",
+    },
+
+        // 📅 START DATE
+    startDate: {
+      type: Date,
+      default: null,
+    },
+
+    // 📅 END DATE
+    endDate: {
+      type: Date,
+      default: null,
     },
     // ORGANIZATION RELATION
 organization: {
@@ -53,6 +76,9 @@ organization: {
       minlength: [8, "Password must be at least 8 characters"],
       select: false,
     },
+
+    otp: String,
+otpExpires: Date,
 
     // 🔁 PASSWORD RESET
     passwordResetToken: String,
@@ -69,18 +95,18 @@ organization: {
 // ======================================================
 // 🔐 HASH PASSWORD BEFORE SAVE
 // ======================================================
-// userSchema.pre("save", async function () {
-//   if (!this.isModified("password")) return;
-
-//   this.password = await bcrypt.hash(this.password, 12);
-// });
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 12);
-
-  next();
 });
+// userSchema.pre("save", async function (next) {
+//   if (!this.isModified("password")) return next();
+
+//   this.password = await bcrypt.hash(this.password, 12);
+
+//   next();
+// });
 
 // ======================================================
 // 🔑 COMPARE PASSWORD (LOGIN CHECK)

@@ -17,6 +17,14 @@ const jobSchema = new mongoose.Schema(
             trim: true,
         },
 
+        locations: [
+            {
+                type: String,
+                trim: true,
+            },
+        ],
+
+
         advertisementNumber: {
             type: String,
             required: [true, "Advertisement number is required"],
@@ -52,21 +60,40 @@ const jobSchema = new mongoose.Schema(
                 type: Number,
                 default: 0,
             },
-
-            nt: {
+            female: {
                 type: Number,
                 default: 0,
+            },
+
+            Transgender: {
+                type: Number,
+                default: 0,
+            },
+            OR: {
+                type: Number,
+                default: 0,
+            },
+            PWBD: {
+                type: Number,
+                default: 0,
+
+            },
+            ExServiced: {
+                type: Number,
+                default: 0,
+
             },
 
             obc: {
                 type: Number,
                 default: 0,
             },
-
-            ews: {
+            EWS: {
                 type: Number,
                 default: 0,
-            },
+            }
+
+
         },
 
         // ======================================================
@@ -104,16 +131,16 @@ const jobSchema = new mongoose.Schema(
         // AGE LIMIT
         // ======================================================
 
-        minimumAge: {
-            type: Number,
-            default: 18,
+        age: {
+            minimum: {
+                type: Number,
+                default: 18,
+            },
+            maximum: {
+                type: Number,
+                default: 35,
+            },
         },
-
-        maximumAge: {
-            type: Number,
-            default: 35,
-        },
-
         // ======================================================
         // APPLICATION FEES
         // ======================================================
@@ -133,16 +160,39 @@ const jobSchema = new mongoose.Schema(
                 type: Number,
                 default: 0,
             },
-
-            nt: {
+            female: {
                 type: Number,
                 default: 0,
+            },
+
+            Transgender: {
+                type: Number,
+                default: 0,
+            },
+            OR: {
+                type: Number,
+                default: 0,
+            },
+            PWBD: {
+                type: Number,
+                default: 0,
+
+            },
+            ExServiced: {
+                type: Number,
+                default: 0,
+
             },
 
             obc: {
                 type: Number,
                 default: 0,
             },
+            Ews: {
+                type: Number,
+                default: 0,
+            }
+
         },
 
         // ======================================================
@@ -180,10 +230,12 @@ const jobSchema = new mongoose.Schema(
         jobStatus: {
             type: String,
             enum: [
+                "Draft",
                 "Review",
                 "Published",
                 "Rejected",
                 "Expired",
+                "Inreview"
             ],
             default: "Draft",
         },
@@ -196,6 +248,35 @@ const jobSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Organization",
             required: true,
+        },
+
+        // ======================================================
+        // JOB POST VALIDITY
+        // ======================================================
+
+        jobPostValidEndDate: {
+            type: Date,
+            required: [true, "Job post valid end date is required"],
+        },
+
+        hashtags: [
+            {
+                type: String,
+            },
+        ],
+
+        deleteRequested: {
+            type: Boolean,
+            default: false,
+        },
+
+        deleteRequestedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
+
+        deleteRequestDate: {
+            type: Date,
         },
 
         // ======================================================

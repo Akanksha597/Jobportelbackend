@@ -11,12 +11,11 @@ const {
   restrictTo,
 } = require("../middleware/protectRoute");
 
-// CREATE
 router.post(
   "/create",
   protectRoute,
-  restrictTo("admin", "job_poster"),
-  upload.single("organizationLogo"), // IMPORTANT
+  restrictTo("admin", "job_poster", "moderator"),
+  upload.single("organizationLogo"),
   organizationController.createOrganization
 );
 // GET ALL
@@ -54,7 +53,7 @@ router.get(
 router.get(
   "/admin/all",
   protectRoute,
-  restrictTo("admin", "moderator"),
+  restrictTo("admin", "moderator" ,),
   organizationController.getAllOrganizationsAdmin
 );
 

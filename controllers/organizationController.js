@@ -51,6 +51,8 @@ exports.createOrganization = async (req, res) => {
   }
 };
 
+
+
 // ======================================================
 // GET ALL ORGANIZATIONS
 // ======================================================
@@ -65,13 +67,10 @@ exports.getAllOrganizations = async (req, res) => {
     let organizations = [];
 
     // ======================================================
-    // ADMIN + MODERATOR CAN SEE ALL
+    // ADMIN -> SEE ALL ORGANIZATIONS
     // ======================================================
 
-    if (
-      req.user.role === "admin" ||
-      req.user.role === "moderator"
-    ) {
+    if (req.user.role === "admin") {
 
       organizations = await Organization.find()
 
@@ -85,7 +84,8 @@ exports.getAllOrganizations = async (req, res) => {
     } else {
 
       // ======================================================
-      // JOB POSTER SEE ONLY OWN
+      // MODERATOR + JOB POSTER
+      // SEE ONLY OWN ORGANIZATIONS
       // ======================================================
 
       organizations = await Organization.find({

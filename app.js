@@ -9,6 +9,8 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const organizationRoutes = require("./routes/organizationRoutes");
+const recentViewRoutes = require("./routes/RecentviewRouter");
+const contactRoutes = require("./routes/contactRoutes");
 connectDB();
 
 const app = express();
@@ -28,6 +30,11 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/organizations", organizationRoutes);
+app.use(
+  "/api/Recentview",
+  recentViewRoutes
+);
+app.use("/api/contacts", contactRoutes);
 
 app.get("/", (req, res) => {
   res.json({
