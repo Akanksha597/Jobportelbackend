@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const OTP = require("../models/OTP");
+const OTP = require("../models/Otp");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
