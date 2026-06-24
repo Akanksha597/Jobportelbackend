@@ -15,38 +15,24 @@ exports.createJob = async (req, res) => {
       advertisementNumber,
       totalVacancy,
       categoryVacancy,
-
       releaseDate,
       startDate,
       endDate,
-
       qualification,
-
       minimumAge,
       maximumAge,
-
       applicationFees,
-
       applyOnlineLink,
       notificationLink,
-      organizationWebsite,
-
       jobDescription,
-
       jobStatus,
       jobPostValidEndDate,
       organization,
-
-      // CUSTOM HASHTAGS
       hashtags: customHashtags,
     } = req.body;
 
-    // ======================================================
-    // GET ORGANIZATION
-    // ======================================================
-
-    const organizationData =
-      await Organization.findById(organization);
+    // ================= CHECK ORGANIZATION =================
+    const organizationData = await Organization.findById(organization);
 
     if (!organizationData) {
       return res.status(404).json({
@@ -55,86 +41,42 @@ exports.createJob = async (req, res) => {
       });
     }
 
-    // ======================================================
-    // AUTO GENERATED HASHTAGS
-    // ======================================================
-
+    // ================= AUTO HASHTAGS =================
     const autoTags = [
-      `#${organizationData.organizationName.replace(
-        /\s+/g,
-        ""
-      )}`,
-
-      `#${organizationData.organizationShortCode.replace(
-        /\s+/g,
-        ""
-      )}`,
-
+      `#${organizationData.organizationName.replace(/\s+/g, "")}`,
+      `#${organizationData.organizationShortCode.replace(/\s+/g, "")}`,
       `#${postName.replace(/\s+/g, "")}`,
-
-      ...(qualification || []).map(
-        (q) =>
-          `#${q.replace(/\s+/g, "")}`
-      ),
+      ...(qualification || []).map((q) => `#${q.replace(/\s+/g, "")}`),
     ];
 
-    // ======================================================
-    // CUSTOM HASHTAGS FROM FRONTEND
-    // ======================================================
-
+    // ================= CUSTOM HASHTAGS =================
     const extraTags = customHashtags
-      ? customHashtags
-          .split(",")
-          .map((tag) =>
-            tag.trim().startsWith("#")
-              ? tag.trim()
-              : `#${tag.trim()}`
-          )
+      ? customHashtags.split(",").map((tag) =>
+          tag.trim().startsWith("#") ? tag.trim() : `#${tag.trim()}`
+        )
       : [];
 
-    // ======================================================
-    // FINAL HASHTAGS
-    // ======================================================
+    const hashtags = [...new Set([...autoTags, ...extraTags])];
 
-    const hashtags = [
-      ...new Set([
-        ...autoTags,
-        ...extraTags,
-      ]),
-    ];
-
-    // ======================================================
-    // APPEND HASHTAGS TO DESCRIPTION
-    // ======================================================
-
+    // ================= FINAL DESCRIPTION =================
     const finalDescription = `
       ${jobDescription}
-
       <br/><br/>
-
       ${hashtags.join(" ")}
     `;
 
-    // ======================================================
-    // CREATE JOB
-    // ======================================================
-
-    const job = await Job.create({
+    // ================= CREATE JOB =================
+    let job = await Job.create({
       postName,
       shortDescription,
       locations,
       jobCategory,
-
       advertisementNumber,
-
       totalVacancy,
-
       categoryVacancy,
-
       releaseDate,
       startDate,
       endDate,
-
       qualification,
 
       age: {
@@ -143,38 +85,36 @@ exports.createJob = async (req, res) => {
       },
 
       applicationFees,
-
       applyOnlineLink,
       notificationLink,
-      organizationWebsite,
 
-      // DESCRIPTION
       jobDescription: finalDescription,
-
-      // SAVE HASHTAGS
       hashtags,
-
       jobStatus,
-
       organization,
-
       jobPostValidEndDate,
-
-      // LOGIN USER
       createdBy: req.user._id,
     });
 
-    res.status(201).json({
+    // ================= POPULATE JOB (IMPORTANT FIX) =================
+    job = await Job.findById(job._id)
+      .populate("createdBy", "name email role")
+      .populate({
+        path: "organization",
+        select:
+          "organizationName organizationShortCode organizationLogo organizationWebsite",
+      });
+
+    // ================= RESPONSE =================
+    return res.status(201).json({
       success: true,
       message: "Job created successfully",
       job,
     });
 
   } catch (error) {
-
     console.log(error);
-
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -194,11 +134,10 @@ exports.getAllJobs = async (req, res) => {
         "name email role"
       )
 
-      .populate(
-        "organization",
-        "organizationName organizationShortCode organizationLogo"
-      )
-
+     .populate(
+  "organization",
+  "organizationName organizationShortCode organizationLogo organizationWebsite"
+)
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -231,10 +170,10 @@ exports.getMyJobs = async (req, res) => {
         "name email role"
       )
 
-      .populate(
-        "organization",
-        "organizationName organizationShortCode organizationLogo"
-      );
+     .populate(
+  "organization",
+  "organizationName organizationShortCode organizationLogo organizationWebsite"
+)
 
     res.status(200).json({
       success: true,
@@ -260,9 +199,9 @@ exports.getMyAllJobs = async (req, res) => {
     const jobs = await Job.find()
       .populate("createdBy", "name email role")
       .populate(
-        "organization",
-        "organizationName organizationShortCode organizationLogo"
-      )
+  "organization",
+  "organizationName organizationShortCode organizationLogo organizationWebsite"
+)
       .sort({ createdAt: -1 });
 
     // ======================================================
@@ -314,13 +253,10 @@ exports.getMyAllJobs = async (req, res) => {
 exports.getSingleJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
-      .populate(
-        "createdBy",
-        "name email role"
-      )
+      .populate("createdBy", "name email role")
       .populate(
         "organization",
-        "organizationName organizationShortCode organizationLogo"
+        "organizationName organizationShortCode organizationLogo organizationWebsite"
       );
 
     if (!job) {
@@ -330,9 +266,7 @@ exports.getSingleJob = async (req, res) => {
       });
     }
 
-    // =========================
-    // SAVE RECENT VIEW
-    // =========================
+    // Save recent view
     if (req.user) {
       await RecentView.findOneAndUpdate(
         {
@@ -340,10 +274,7 @@ exports.getSingleJob = async (req, res) => {
           job: job._id,
         },
         {},
-        {
-          upsert: true,
-          new: true,
-        }
+        { upsert: true, new: true }
       );
     }
 
@@ -351,17 +282,14 @@ exports.getSingleJob = async (req, res) => {
       success: true,
       job,
     });
-
   } catch (error) {
     console.log(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 // ======================================================
 // UPDATE JOB
 // ======================================================
@@ -640,9 +568,9 @@ exports.getDeleteRequests =
         )
 
         .populate(
-          "organization",
-          "organizationName organizationShortCode"
-        )
+  "organization",
+  "organizationName organizationShortCode organizationLogo organizationWebsite"
+)
 
         .sort({
           deleteRequestDate: -1,

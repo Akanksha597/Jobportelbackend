@@ -146,6 +146,10 @@ const jobSchema = new mongoose.Schema(
         // ======================================================
 
         applicationFees: {
+            all: {
+                type: Number,
+                default: 0,
+            },
             general: {
                 type: Number,
                 default: 0,
@@ -209,10 +213,7 @@ const jobSchema = new mongoose.Schema(
             default: "",
         },
 
-        organizationWebsite: {
-            type: String,
-            default: "",
-        },
+
 
         // ======================================================
         // DESCRIPTION
