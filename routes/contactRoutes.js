@@ -19,7 +19,7 @@ router.post(
 
 // Admin
 router.get(
-  "/contacts",
+  "/",
   getAllContacts
 );
 

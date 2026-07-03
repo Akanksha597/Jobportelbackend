@@ -10,7 +10,7 @@ exports.createJob = async (req, res) => {
     const {
       postName,
       locations,
-      shortDescription,
+      ShortDescription,
       jobCategory,
       advertisementNumber,
       totalVacancy,
@@ -19,8 +19,7 @@ exports.createJob = async (req, res) => {
       startDate,
       endDate,
       qualification,
-      minimumAge,
-      maximumAge,
+       age,
       applicationFees,
       applyOnlineLink,
       notificationLink,
@@ -68,7 +67,8 @@ exports.createJob = async (req, res) => {
     // ================= CREATE JOB =================
     let job = await Job.create({
       postName,
-      shortDescription,
+    
+      ShortDescription,
       locations,
       jobCategory,
       advertisementNumber,
@@ -79,10 +79,12 @@ exports.createJob = async (req, res) => {
       endDate,
       qualification,
 
-      age: {
-        minimum: minimumAge || 18,
-        maximum: maximumAge || 35,
-      },
+      
+       age: {
+  minimum: Number(age?.minimum ?? 18),
+  maximum: Number(age?.maximum ?? 35),
+},
+      
 
       applicationFees,
       applyOnlineLink,
