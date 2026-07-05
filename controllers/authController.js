@@ -91,48 +91,102 @@ exports.signup = catchAsync(
 
 // ================= LOGIN =================
 
-exports.login = catchAsync(
-  async (req, res) => {
-    const { email, password } =
-      req.body;
+// exports.login = catchAsync(
+//   async (req, res) => {
+//     const { email, password } =
+//       req.body;
 
-    const user =
-      await User.findOne({
-        email,
-      }).select("+password");
+//     const user =
+//       await User.findOne({
+//         email,
+//       }).select("+password");
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email",
-      });
-    }
+//     if (!user) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "Invalid email",
+//       });
+//     }
 
-    const isMatch =
-      await user.correctPassword(
-        password,
-        user.password
-      );
+//     const isMatch =
+//       await user.correctPassword(
+//         password,
+//         user.password
+//       );
 
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message:
-          "Invalid password",
-      });
-    }
+//     if (!isMatch) {
+//       return res.status(401).json({
+//         success: false,
+//         message:
+//           "Invalid password",
+//       });
+//     }
 
-    const token = createToken(
-      user._id
-    );
+//     const token = createToken(
+//       user._id
+//     );
 
-    res.status(200).json({
-      success: true,
-      token,
-      user,
+//     res.status(200).json({
+//       success: true,
+//       token,
+//       user,
+//     });
+//   }
+// );
+
+exports.login = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({
+    email,
+  }).select("+password");
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email",
     });
   }
-);
+
+  // ================= CHECK ACCOUNT EXPIRY =================
+  if (user.endDate) {
+    const today = new Date();
+    const endDate = new Date(user.endDate);
+
+    // Ignore time
+    today.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    if (today > endDate) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has expired. Please contact the administrator.",
+      });
+    }
+  }
+
+  // ================= CHECK PASSWORD =================
+  const isMatch = await user.correctPassword(
+    password,
+    user.password
+  );
+
+  if (!isMatch) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid password",
+    });
+  }
+
+  // ================= GENERATE TOKEN =================
+  const token = createToken(user._id);
+
+  res.status(200).json({
+    success: true,
+    token,
+    user,
+  });
+});
 
 // ================= GET PROFILE =================
 
