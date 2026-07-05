@@ -63,53 +63,16 @@ exports.createOrganization = async (req, res) => {
 
 exports.getAllOrganizations = async (req, res) => {
   try {
-
-    let organizations = [];
-
-    // ======================================================
-    // ADMIN -> SEE ALL ORGANIZATIONS
-    // ======================================================
-
-    if (req.user.role === "admin") {
-
-      organizations = await Organization.find()
-
-        .populate(
-          "createdBy",
-          "name email role"
-        )
-
-        .sort({ createdAt: -1 });
-
-    } else {
-
-      // ======================================================
-      // MODERATOR + JOB POSTER
-      // SEE ONLY OWN ORGANIZATIONS
-      // ======================================================
-
-      organizations = await Organization.find({
-        createdBy: req.user._id,
-      })
-
-        .populate(
-          "createdBy",
-          "name email role"
-        )
-
-        .sort({ createdAt: -1 });
-    }
+    const organizations = await Organization.find()
+      .populate("createdBy", "name email role")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
       totalOrganizations: organizations.length,
       organizations,
     });
-
   } catch (error) {
-
-    console.log(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -235,12 +198,9 @@ exports.getAllOrganizationsAdmin = async (req, res) => {
 // ======================================================
 // DELETE ORGANIZATION
 // ======================================================
-
 exports.deleteOrganization = async (req, res) => {
   try {
-    const organization = await Organization.findById(
-      req.params.id
-    );
+    const organization = await Organization.findById(req.params.id);
 
     if (!organization) {
       return res.status(404).json({
@@ -249,22 +209,16 @@ exports.deleteOrganization = async (req, res) => {
       });
     }
 
-    // OWNER OR ROLE CHECK
+    const isAdmin = req.user.role === "admin";
+    const isOwner =
+      organization.createdBy.toString() === req.user._id.toString();
 
-    const allowedRoles = [
-      "admin",
-      "moderator",
-      "job_poster",
-    ];
-
-    if (
-      organization.createdBy.toString() !==
-        req.user._id.toString() &&
-      !allowedRoles.includes(req.user.role)
-    ) {
+    // Admin can delete everything.
+    // Others can delete only their own organization.
+    if (!isAdmin && !isOwner) {
       return res.status(403).json({
         success: false,
-        message: "Not authorized",
+        message: "Not Authorized",
       });
     }
 
@@ -274,12 +228,10 @@ exports.deleteOrganization = async (req, res) => {
       success: true,
       message: "Organization deleted successfully",
     });
-  } catch (error) {
-    console.log(error);
-
+  } catch (err) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
   }
 };
