@@ -78,7 +78,7 @@ const jobSchema = new mongoose.Schema(
                 default: 0,
 
             },
-            ExServiced: {
+             ExServicemen: {
                 type: Number,
                 default: 0,
 
