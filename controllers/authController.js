@@ -45,16 +45,12 @@ exports.signup = catchAsync(
       });
     }
 
-    if (
-      password 
-   
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Passwords do not match",
-      });
-    }
+  if (password !== confirmPassword) {
+  return res.status(400).json({
+    success: false,
+    message: "Passwords do not match",
+  });
+}
 
     const existingUser =
       await User.findOne({
