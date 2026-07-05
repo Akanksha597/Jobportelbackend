@@ -7,6 +7,7 @@ const {
   createContact,
   getAllContacts,
   deleteContact,
+  replyContact,
 } = require(
   "../controllers/contactController"
 );
@@ -16,7 +17,7 @@ router.post(
   "/contact",
   createContact
 );
-
+router.post("/reply/:id", replyContact);
 // Admin
 router.get(
   "/",

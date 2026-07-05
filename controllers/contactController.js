@@ -1,5 +1,7 @@
 const Contact = require("../models/Contact");
 
+const sendEmail = require("../config/email");
+
 // ==============================
 // CREATE CONTACT MESSAGE
 // ==============================
@@ -115,3 +117,51 @@ exports.deleteContact =
       });
     }
   };
+
+  exports.replyContact = async (req, res) => {
+  try {
+    const { subject, message } = req.body;
+
+    const contact = await Contact.findById(req.params.id);
+
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        message: "Contact not found",
+      });
+    }
+
+    await sendEmail({
+      to: contact.email,
+      subject,
+      html: `
+        <h2>Hello ${contact.name},</h2>
+
+        <p>${message}</p>
+
+        <br/>
+
+        <p>Regards,</p>
+        <strong>Your Company Team</strong>
+      `,
+    });
+
+    contact.replyMessage = message;
+    contact.replyDate = new Date();
+    contact.status = "Replied";
+
+    await contact.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Email sent successfully",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to send email",
+    });
+  }
+};

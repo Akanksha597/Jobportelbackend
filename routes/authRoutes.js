@@ -14,6 +14,7 @@ const {
   resetPassword,
   forgotPassword,
   resetPasswordByOtp,
+  updateEndDate,
   
 } = require("../controllers/authController");
 
@@ -101,6 +102,12 @@ router.post(
 router.post(
   "/reset-password",
   resetPasswordByOtp
+);
+
+router.put(
+  "/update-end-date/:id",
+  protectRoute,
+  updateEndDate
 );
 
 // DASHBOARD

@@ -401,3 +401,33 @@ exports.logout = (req, res) => {
     message: "Logged out",
   });
 };
+
+exports.updateEndDate = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        endDate: req.body.endDate || null,
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "End date updated successfully",
+      user,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
